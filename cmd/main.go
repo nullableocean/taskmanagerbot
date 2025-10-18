@@ -17,11 +17,11 @@ import (
 func main() {
 	conf := NewConfig()
 
-	bot, updates := startBotWithWebhook(conf)
-
+	bot := setupBotWithWebhook(conf)
 	responder := tg.NewResponder(bot)
-
 	updateHandler := tg.NewUpdateHandler(responder)
+
+	updates := bot.ListenForWebhook("/")
 	updateListener := tg.NewUpdateListener(updates, updateHandler)
 
 	go func() {
@@ -31,12 +31,21 @@ func main() {
 		}
 	}()
 
-	listen(conf.APP.Port)
+	listenServer(conf.APP.Port)
 	updateListener.Stop()
+
+	log.Println("service closed...")
 }
 
-func listen(port string) {
-	server := &http.Server{Addr: ":" + port}
+func listenServer(port string) {
+	defMux := http.DefaultServeMux
+	defMux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
+
+	server := &http.Server{Addr: ":" + port, Handler: defMux}
+
 	go func() {
 		err := server.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
@@ -58,7 +67,7 @@ func listen(port string) {
 	log.Println("listen closed...")
 }
 
-func startBotWithWebhook(conf Config) (*tgbotapi.BotAPI, tgbotapi.UpdatesChannel) {
+func setupBotWithWebhook(conf Config) *tgbotapi.BotAPI {
 	bot, err := tgbotapi.NewBotAPI(conf.BOT.Token)
 	if err != nil {
 		log.Fatalf("create bot error: %v", err)
@@ -79,7 +88,5 @@ func startBotWithWebhook(conf Config) (*tgbotapi.BotAPI, tgbotapi.UpdatesChannel
 		log.Fatalf("telegram callback failed: %s", info.LastErrorMessage)
 	}
 
-	updatesCh := bot.ListenForWebhook("/")
-
-	return bot, updatesCh
+	return bot
 }
