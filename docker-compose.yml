@@ -22,6 +22,9 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    user: "${USER_UID:-1000}:${USER_GID:-1000}"
+    volumes:
+      - "${LOG_DIR:-./logs}:/app/logs"
     networks:
       - appnet
 

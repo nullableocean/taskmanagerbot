@@ -3,7 +3,8 @@ package main
 import "os"
 
 const (
-	port = "8000"
+	port   = "8000"
+	logDir = "./logs"
 )
 
 type Config struct {
@@ -23,6 +24,11 @@ type Config struct {
 	APP struct {
 		Port string
 	}
+
+	LOG struct {
+		LogFile string
+		LogDir  string
+	}
 }
 
 func NewConfig() Config {
@@ -38,6 +44,9 @@ func NewConfig() Config {
 	cnf.BOT.WebhookUrl = os.Getenv("BOT_WEBHOOK")
 
 	cnf.APP.Port = port
+
+	cnf.LOG.LogDir = logDir
+	cnf.LOG.LogFile = os.Getenv("LOG_FILE")
 
 	return cnf
 }

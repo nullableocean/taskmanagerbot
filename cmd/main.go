@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 	"taskbot/delivery/tg"
+	"taskbot/pkg/logger"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -16,6 +17,15 @@ import (
 
 func main() {
 	conf := NewConfig()
+
+	file, err := logger.SetupFileForLogs(conf.LOG.LogDir, conf.LOG.LogFile)
+	if err != nil {
+		log.Println(err)
+	}
+
+	if file != nil {
+		defer file.Close()
+	}
 
 	bot := setupBotWithWebhook(conf)
 	responder := tg.NewResponder(bot)
@@ -52,6 +62,8 @@ func listenServer(port string) {
 			log.Fatalf("server error: %v", err)
 		}
 	}()
+
+	log.Println("server start listen...")
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
