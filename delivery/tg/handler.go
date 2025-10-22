@@ -23,8 +23,8 @@ func (h *UpdateHandler) Handle(update tgbotapi.Update) {
 		return
 	}
 
+	log.Printf("get message. chat_id: %v, command: %.8v", update.Message.Chat.ID, update.Message.Command())
 	if update.Message.IsCommand() {
-		log.Printf("get command. chat_id: %v, command: %.8v", update.Message.Chat.ID, update.Message.Command())
 
 		command := update.Message.Command()
 		chatId := update.Message.Chat.ID
@@ -41,4 +41,10 @@ func (h *UpdateHandler) Handle(update tgbotapi.Update) {
 		//inline text handling
 	}
 
+	/*
+		tg.server -> req -> update
+		update -> chatID -> user -> chatState(get|create) -> selectStatePath ->
+		updateData -> handleData, changeState, saveData -> createResponse(message, keyboard?) -> send
+
+	*/
 }

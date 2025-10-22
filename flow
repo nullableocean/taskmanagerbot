@@ -1,0 +1,66 @@
+Прием входящих updates от Telegram
+Валидация и парсинг входящих данных
+Маршрутизация к соответствующим обработчикам
+Формирование исходящих сообщений
+Обработка ошибок и retry логика
+
+Update Parser
+Router
+Response Builder
+
+Update Parser & Validator
+JSON парсинг входящих updates
+
+Валидация структуры (типы сообщений, форматы)
+
+Нормализация данных (приведение к внутренним моделям)
+
+Проверка подписи (для webhook)
+
+Update ROuter
+Типы сообщений:
+├── Text Message → Command Router
+├── Callback Query → Callback Handler  
+├── Inline Query → Inline Handler
+├── Edited Message → Edit Handler
+└── Unknown → Error Handler
+
+Command ROuter
+Команды:
+├── /start → StartHandler
+├── /new → CreateTaskHandler
+├── /list → ListTasksHandler
+├── /done → CompleteTaskHandler
+└── * → DefaultHandler
+
+
+
+Response Builder
+Построение клавиатур (inline, reply)
+
+Форматирование текста (Markdown, HTML)
+
+Подготовка медиа (изображения, документы)
+
+Управление состоянием чата
+
+
+1. Получение сообщения от Telegram
+2. Парсинг и валидация
+3. Аутентификация пользователя
+4. Проверка состояния диалога
+5. Маршрутизация на соответствующий хендлер
+6. Вызов Use Case
+7. Обращение к сервисам и репозиториям
+8. Формирование ответа
+9. Отправка ответа пользователю
+
+
+Application Layer
+Command Processor - обработчик команд
+
+State Manager - управление состояниями диалога
+
+Keyboard Builder - построение интерфейсов
+
+Message Formatter - форматирование ответов

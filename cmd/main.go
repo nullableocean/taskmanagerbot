@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -10,7 +12,11 @@ import (
 	"syscall"
 	"taskbot/delivery/tg"
 	"taskbot/pkg/logger"
+	"taskbot/repository/pg"
+	"taskbot/service/user"
 	"time"
+
+	_ "github.com/lib/pq"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -18,14 +24,31 @@ import (
 func main() {
 	conf := NewConfig()
 
+	// logs
 	file, err := logger.SetupFileForLogs(conf.LOG.LogDir, conf.LOG.LogFile)
 	if err != nil {
 		log.Println(err)
 	}
-
 	if file != nil {
 		defer file.Close()
 	}
+
+	// DB
+	dsn := fmt.Sprintf(
+		"user=%s password=%s dbname=%s host=%s port=%s sslmode=disable",
+		conf.DB.User, conf.DB.Pass, conf.DB.DBName, conf.DB.Host, conf.DB.Port,
+	)
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	// services
+	userRepo := pg.NewUserRepository(db)
+
+	userService := user.NewUserService(userRepo)
+	_ = user.NewTelegramUserService(userService, userRepo)
 
 	bot := setupBotWithWebhook(conf)
 	responder := tg.NewResponder(bot)
