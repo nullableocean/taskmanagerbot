@@ -16,6 +16,12 @@ type Config struct {
 		DBName string
 	}
 
+	REDIS struct {
+		Host     string
+		Port     string
+		Password string
+	}
+
 	BOT struct {
 		Token      string
 		WebhookUrl string
@@ -39,6 +45,10 @@ func NewConfig() Config {
 	cnf.DB.Host = os.Getenv("PG_HOST")
 	cnf.DB.Port = os.Getenv("PG_PORT")
 	cnf.DB.DBName = os.Getenv("DB_NAME")
+
+	cnf.REDIS.Host = os.Getenv("REDIS_HOST")
+	cnf.REDIS.Port = os.Getenv("REDIS_PORT")
+	cnf.REDIS.Password = os.Getenv("REDIS_PASSWORD")
 
 	cnf.BOT.Token = os.Getenv("BOT_TOKEN")
 	cnf.BOT.WebhookUrl = os.Getenv("BOT_WEBHOOK")

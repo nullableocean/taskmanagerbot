@@ -1,7 +1,8 @@
-package user
+package service
 
 import "errors"
 
 var (
+	ErrNotFound     = errors.New("not found")
 	ErrValidateData = errors.New("invalid data")
 )

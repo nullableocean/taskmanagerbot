@@ -1,9 +1,6 @@
 package tg
 
 import (
-	"log"
-	"taskbot/delivery/tg/messages"
-
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -17,13 +14,10 @@ func NewResponder(bot *tgbotapi.BotAPI) *Responder {
 	}
 }
 
-func (r *Responder) Send(m messages.Message) {
-	msgConf := tgbotapi.NewMessage(m.ChatId, m.Text)
-	msgConf.ParseMode = tgbotapi.ModeHTML
+func (r *Responder) Send(msgConfig tgbotapi.MessageConfig) error {
+	msgConfig.ParseMode = tgbotapi.ModeHTML
 
-	_, err := r.bot.Send(msgConf)
+	_, err := r.bot.Send(msgConfig)
 
-	if err != nil {
-		log.Printf("bot send error. chat: %v, err: %v", m.ChatId, err)
-	}
+	return err
 }

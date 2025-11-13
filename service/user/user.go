@@ -5,6 +5,7 @@ import (
 	"taskbot/domain"
 	"taskbot/pkg/password"
 	"taskbot/repository"
+	"taskbot/service"
 )
 
 type UserService struct {
@@ -31,10 +32,10 @@ func (s *UserService) Save(u domain.User) (domain.User, error) {
 
 func (s *UserService) validateNewUser(data domain.User) error {
 	if data.Username == "" {
-		return fmt.Errorf("%w. empty username", ErrValidateData)
+		return fmt.Errorf("%w: user username is empty", service.ErrValidateData)
 	}
 	if data.Password == "" {
-		return fmt.Errorf("%w. empty password", ErrValidateData)
+		return fmt.Errorf("%w: user password is empty", service.ErrValidateData)
 	}
 
 	return nil

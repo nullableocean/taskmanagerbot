@@ -13,16 +13,21 @@ import (
 	"taskbot/delivery/tg"
 	"taskbot/pkg/logger"
 	"taskbot/repository/pg"
+	"taskbot/repository/rdb"
+	"taskbot/service/task"
+	"taskbot/service/telegram"
 	"taskbot/service/user"
 	"time"
 
 	_ "github.com/lib/pq"
+	"github.com/redis/go-redis/v9"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 func main() {
 	conf := NewConfig()
+	ctx := context.Background()
 
 	// logs
 	file, err := logger.SetupFileForLogs(conf.LOG.LogDir, conf.LOG.LogFile)
@@ -39,20 +44,38 @@ func main() {
 		conf.DB.User, conf.DB.Pass, conf.DB.DBName, conf.DB.Host, conf.DB.Port,
 	)
 	db, err := sql.Open("postgres", dsn)
-	if err != nil {
-		log.Fatal(err)
-	}
 	defer db.Close()
+
+	if err != nil {
+		log.Fatalf("db open error: %v", err)
+	}
+	if err := db.Ping(); err != nil {
+		log.Fatalf("db ping error: %v", err)
+	}
+
+	redisDb := redis.NewClient(&redis.Options{
+		Addr:     conf.REDIS.Host + ":" + conf.REDIS.Port,
+		Password: conf.REDIS.Password,
+		DB:       0,
+	})
+
+	err = redisDb.Set(ctx, "health", "check", 0).Err()
+	if err != nil {
+		log.Fatalf("redis connect error: %v", err)
+	}
 
 	// services
 	userRepo := pg.NewUserRepository(db)
+	taskRepo := pg.NewTaskRepository(db)
+	stateStore := rdb.NewStateStore(redisDb)
 
 	userService := user.NewUserService(userRepo)
-	_ = user.NewTelegramUserService(userService, userRepo)
+	tgUserService := user.NewTelegramUserService(userService, userRepo)
+	taskService := task.NewTaskService(taskRepo)
 
 	bot := setupBotWithWebhook(conf)
-	responder := tg.NewResponder(bot)
-	updateHandler := tg.NewUpdateHandler(responder)
+	updateProccesor := telegram.NewUpdateProccesor(tgUserService, taskService, stateStore)
+	updateHandler := tg.NewUpdateHandler(tg.NewResponder(bot), updateProccesor)
 
 	updates := bot.ListenForWebhook("/")
 	updateListener := tg.NewUpdateListener(updates, updateHandler)

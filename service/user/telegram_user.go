@@ -7,6 +7,7 @@ import (
 	"taskbot/domain"
 	"taskbot/pkg/password"
 	"taskbot/repository"
+	"taskbot/service"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -64,7 +65,12 @@ func (s *TelegramUserService) CreateFromUpdate(update tgbotapi.Update) (domain.U
 }
 
 func (s *TelegramUserService) FindByTelegramId(tid int64) (domain.User, error) {
-	return s.urepo.GetByTelegramId(tid)
+	u, err := s.urepo.GetByTelegramId(tid)
+	if err != nil && errors.As(err, repository.ErrNotFound) {
+		return u, service.ErrNotFound
+	}
+
+	return u, err
 }
 
 func (s *TelegramUserService) getPass() string {
