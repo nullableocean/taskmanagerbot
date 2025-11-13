@@ -8,7 +8,6 @@ type Status string
 
 const (
 	IDLE            Status = "idle"
-	CREATE_TASK     Status = "create_task"
 	WAIT_TASK_TITLE Status = "wait_title"
 	WAIT_TASK_BODY  Status = "wait_body"
 )

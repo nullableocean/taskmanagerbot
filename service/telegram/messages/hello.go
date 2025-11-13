@@ -1,7 +1,8 @@
 package messages
 
-func HelloMessageText() string {
+func HelloMessage() string {
 	return `
-<b>Привет, юзер<\b>
+<b>Сегодня большой день, как и вчера!<\b>
+Создай задачу. Выполни задачу. Съешь печенку.
 	`
 }

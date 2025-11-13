@@ -22,15 +22,17 @@ func NewUpdateHandler(r *Responder, processor *telegram.UpdateProcessor) *Update
 func (h *UpdateHandler) Handle(update tgbotapi.Update) {
 
 	h.logUpdate(update)
-	msgConf, err := h.processor.Handle(update)
+	msges, err := h.processor.Handle(update)
 	if err != nil {
 		log.Printf("error processing update: %v\n", err)
 		return
 	}
 
-	err = h.resp.Send(msgConf)
-	if err != nil {
-		log.Printf("bot send error. chat: %v, err: %v\n", msgConf.ChatID, err)
+	for _, m := range msges {
+		err = h.resp.Send(m)
+		if err != nil {
+			log.Printf("bot send error. chat: %v, err: %v\n", m.ChatID, err)
+		}
 	}
 }
 
