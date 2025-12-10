@@ -15,7 +15,7 @@ import (
 	"taskbot/repository/pg"
 	"taskbot/repository/rdb"
 	"taskbot/service/task"
-	"taskbot/service/telegram"
+	"taskbot/service/telegram/processor"
 	"taskbot/service/user"
 	"time"
 
@@ -74,7 +74,7 @@ func main() {
 	taskService := task.NewTaskService(taskRepo)
 
 	bot := setupBotWithWebhook(conf)
-	updateProccesor := telegram.NewUpdateProccesor(tgUserService, taskService, stateStore)
+	updateProccesor := processor.NewUpdateProccesor(tgUserService, taskService, stateStore)
 	updateHandler := tg.NewUpdateHandler(tg.NewResponder(bot), updateProccesor)
 
 	updates := bot.ListenForWebhook("/")

@@ -2,17 +2,17 @@ package tg
 
 import (
 	"log"
-	"taskbot/service/telegram"
+	"taskbot/service/telegram/processor"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type UpdateHandler struct {
 	resp      *Responder
-	processor *telegram.UpdateProcessor
+	processor *processor.UpdateProcessor
 }
 
-func NewUpdateHandler(r *Responder, processor *telegram.UpdateProcessor) *UpdateHandler {
+func NewUpdateHandler(r *Responder, processor *processor.UpdateProcessor) *UpdateHandler {
 	return &UpdateHandler{
 		resp:      r,
 		processor: processor,
@@ -25,6 +25,8 @@ func (h *UpdateHandler) Handle(update tgbotapi.Update) {
 	msges, err := h.processor.Handle(update)
 	if err != nil {
 		log.Printf("error processing update: %v\n", err)
+
+		h.resp.Send(tgbotapi.NewMessage(update.FromChat().ID, "Что-то пошло не так. Попробуй ещё раз :)"))
 		return
 	}
 

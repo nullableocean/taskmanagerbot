@@ -3,23 +3,11 @@ package messages
 import (
 	"fmt"
 	"taskbot/domain"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-const ()
-
-func WaitTaskTitle() string {
-	return `
-<b>Озаглавь задачу:</b>	
-`
-}
-
-func WaitTaskBody() string {
-	return `
-<b>Опиши суть задачи:</b>	
-`
-}
-
-func TaskContent(task domain.Task) string {
+func TaskContent(user domain.User, task domain.Task) tgbotapi.MessageConfig {
 	format := `
 <b>%s</b>
 
@@ -36,5 +24,47 @@ func TaskContent(task domain.Task) string {
 		status = "Ожидает"
 	}
 
-	return fmt.Sprintf(format, task.Title, task.Body, status)
+	text := fmt.Sprintf(format, task.Title, task.Body, status)
+
+	return tgbotapi.NewMessage(user.TelegramId, text)
+}
+
+func WaitTaskTitle(user domain.User) tgbotapi.MessageConfig {
+	text := `
+<b>Озаглавь задачу:</b>	
+`
+
+	return tgbotapi.NewMessage(user.TelegramId, text)
+}
+
+func WaitTaskBody(user domain.User) tgbotapi.MessageConfig {
+	text := `
+<b>Опиши суть задачи:</b>	
+`
+
+	return tgbotapi.NewMessage(user.TelegramId, text)
+}
+
+func TaskCreated(user domain.User) tgbotapi.MessageConfig {
+	text := `
+<b>Задача успешно создана.</b>	
+`
+
+	return tgbotapi.NewMessage(user.TelegramId, text)
+}
+
+func TaskReady(user domain.User) tgbotapi.MessageConfig {
+	text := `
+<b>Задача выполнена.</b>	
+`
+
+	return tgbotapi.NewMessage(user.TelegramId, text)
+}
+
+func TaskAlreadyReady(user domain.User) tgbotapi.MessageConfig {
+	text := `
+<b>Задача уже помечена, как выполненная.</b>	
+`
+
+	return tgbotapi.NewMessage(user.TelegramId, text)
 }

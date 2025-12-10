@@ -1,34 +1,34 @@
 package telegram
 
-type Update struct {
+type Event struct {
 	chatId int64
 	data   string
 
 	isCommand, isCallback, isText bool
 }
 
-func (u Update) GetChatId() int64 {
+func (u Event) GetChatId() int64 {
 	return u.chatId
 }
 
-func (u Update) GetData() string {
+func (u Event) GetData() string {
 	return u.data
 }
 
-func (u Update) IsText() bool {
+func (u Event) IsText() bool {
 	return u.isText
 }
 
-func (u Update) IsCommand() bool {
+func (u Event) IsCommand() bool {
 	return u.isCommand
 }
 
-func (u Update) IsCallback() bool {
+func (u Event) IsCallback() bool {
 	return u.isCallback
 }
 
-func NewCallbackUpdate(chatId int64, callback string) Update {
-	return Update{
+func NewCallbackEvent(chatId int64, callback string) Event {
+	return Event{
 		chatId:     chatId,
 		data:       callback,
 		isCommand:  false,
@@ -37,8 +37,8 @@ func NewCallbackUpdate(chatId int64, callback string) Update {
 	}
 }
 
-func NewCommandUpdate(chatId int64, command string) Update {
-	return Update{
+func NewCommandEvent(chatId int64, command string) Event {
+	return Event{
 		chatId:     chatId,
 		data:       command,
 		isCommand:  false,
@@ -46,8 +46,8 @@ func NewCommandUpdate(chatId int64, command string) Update {
 		isText:     false,
 	}
 }
-func NewTextUpdate(chatId int64, text string) Update {
-	return Update{
+func NewTextEvent(chatId int64, text string) Event {
+	return Event{
 		chatId:     chatId,
 		data:       text,
 		isCommand:  false,
