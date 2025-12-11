@@ -25,6 +25,8 @@ services:
     user: "${USER_UID:-1000}:${USER_GID:-1000}"
     volumes:
       - "${LOG_DIR:-./logs}:/app/logs"
+    expose:
+      - "8000"
     networks:
       - appnet
 
@@ -77,8 +79,6 @@ services:
     image: redis:latest
     environment:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - REDIS_USER=${REDIS_USER}
-      - REDIS_USER_PASSWORD=${REDIS_USER_PASSWORD}
     ports:
       - "${REDIS_PORT}:6379"
     volumes:
@@ -92,6 +92,8 @@ services:
           cpus: '0.25'
           memory: 256M
     restart: unless-stopped
+    networks:
+      - appnet
 
 volumes:
   botpgdata:

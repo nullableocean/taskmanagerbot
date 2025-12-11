@@ -34,7 +34,7 @@ func (r *UserRepository) Create(user domain.User) (domain.User, error) {
 	}
 
 	query := `
-		INSERT INTO users (username, first_name, password, telegram_id, created_at, updated_at)
+		INSERT INTO users (username, first_name, pass, telegram_id, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id
 	`
@@ -76,7 +76,7 @@ func (r *UserRepository) Update(user domain.User) (domain.User, error) {
 
 	query := `
 		UPDATE users 
-		SET username = $1, first_name = $2, password = $3, telegram_id = $4, updated_at = $5
+		SET username = $1, first_name = $2, pass = $3, telegram_id = $4, updated_at = $5
 		WHERE id = $6
 	`
 
@@ -110,7 +110,7 @@ func (r *UserRepository) Update(user domain.User) (domain.User, error) {
 
 func (r *UserRepository) Get(id int64) (domain.User, error) {
 	query := `
-		SELECT id, username, first_name, password, telegram_id, created_at, updated_at
+		SELECT id, username, first_name, pass, telegram_id, created_at, updated_at
 		FROM users 
 		WHERE id = $1
 	`
@@ -138,7 +138,7 @@ func (r *UserRepository) Get(id int64) (domain.User, error) {
 
 func (r *UserRepository) GetByTelegramId(tid int64) (domain.User, error) {
 	query := `
-		SELECT id, username, first_name, password, telegram_id, created_at, updated_at
+		SELECT id, username, first_name, pass, telegram_id, created_at, updated_at
 		FROM users 
 		WHERE telegram_id = $1
 	`
@@ -166,7 +166,7 @@ func (r *UserRepository) GetByTelegramId(tid int64) (domain.User, error) {
 
 func (r *UserRepository) GetByUsername(username string) (domain.User, error) {
 	query := `
-		SELECT id, username, first_name, password, telegram_id, created_at, updated_at
+		SELECT id, username, first_name, pass, telegram_id, created_at, updated_at
 		FROM users 
 		WHERE username = $1
 	`
@@ -194,7 +194,7 @@ func (r *UserRepository) GetByUsername(username string) (domain.User, error) {
 
 func (r *UserRepository) GetAll() ([]domain.User, error) {
 	query := `
-		SELECT id, username, first_name, password, telegram_id, created_at, updated_at
+		SELECT id, username, first_name, pass, telegram_id, created_at, updated_at
 		FROM users 
 		ORDER BY id
 	`

@@ -1,11 +1,11 @@
 CREATE TABLE tasks (
-    id SERIAL PRIMARY KEY
-    user_id INTEGER NOT NULL
-    title VARCHAR(255) NOT NULL
-    body VARCHAR(255)
-    status VARCHAR(16) NOT NULL
-    created_at TIMESTAMPTZ DEFAULT NOW()
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    body VARCHAR(255),
+    status VARCHAR(16) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
 
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 )

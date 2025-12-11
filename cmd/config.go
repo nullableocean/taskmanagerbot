@@ -3,8 +3,10 @@ package main
 import "os"
 
 const (
-	port   = "8000"
-	logDir = "./logs"
+	postgresPort = "5432"
+	redisPort    = "6379"
+	port         = "8000"
+	logDir       = "./logs"
 )
 
 type Config struct {
@@ -43,7 +45,7 @@ func NewConfig() Config {
 	cnf.DB.User = os.Getenv("PG_USER")
 	cnf.DB.Pass = os.Getenv("PG_PASSWORD")
 	cnf.DB.Host = os.Getenv("PG_HOST")
-	cnf.DB.Port = os.Getenv("PG_PORT")
+	cnf.DB.Port = postgresPort
 	cnf.DB.DBName = os.Getenv("DB_NAME")
 
 	cnf.REDIS.Host = os.Getenv("REDIS_HOST")

@@ -11,10 +11,10 @@ import (
 )
 
 func (p *UpdateProcessor) extractUserFromUpdate(update tgbotapi.Update) (domain.User, error) {
-	var chatId int64
+	chatId := update.FromChat().ID
 
 	user, err := p.userTgService.FindByTelegramId(chatId)
-	if err != nil && errors.As(err, service.ErrNotFound) {
+	if err != nil && errors.Is(err, service.ErrNotFound) {
 		return p.userTgService.CreateFromUpdate(update)
 	}
 

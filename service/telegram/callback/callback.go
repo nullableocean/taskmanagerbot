@@ -8,6 +8,7 @@ import (
 type Operation string
 
 const (
+	Undefined     Operation = "undefined"
 	TaskDone      Operation = "tdone"
 	TaskDelete    Operation = "tdelete"
 	NextTasksPage Operation = "tnextpage"
@@ -23,5 +24,10 @@ func CreateCallbackData(op Operation, data string) string {
 
 func ExtractCallbackData(callback string) (Operation, string) {
 	parts := strings.Split(callback, separate)
-	return Operation(parts[0]), parts[1]
+
+	if len(parts) > 1 {
+		return Operation(parts[0]), parts[1]
+	}
+
+	return Undefined, ""
 }

@@ -96,6 +96,8 @@ func main() {
 func listenServer(port string) {
 	defMux := http.DefaultServeMux
 	defMux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Health check called from: %s\n", r.RemoteAddr)
+
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
 	})
@@ -128,7 +130,7 @@ func listenServer(port string) {
 func setupBotWithWebhook(conf Config) *tgbotapi.BotAPI {
 	bot, err := tgbotapi.NewBotAPI(conf.BOT.Token)
 	if err != nil {
-		log.Fatalf("create bot error: %v", err)
+		log.Fatalf("create bot error: %v token: %v", err, conf.BOT.Token)
 	}
 
 	wh, _ := tgbotapi.NewWebhook(conf.BOT.WebhookUrl)

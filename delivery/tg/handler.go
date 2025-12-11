@@ -2,6 +2,8 @@ package tg
 
 import (
 	"log"
+	"runtime/debug"
+	"strings"
 	"taskbot/service/telegram/processor"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -20,13 +22,32 @@ func NewUpdateHandler(r *Responder, processor *processor.UpdateProcessor) *Updat
 }
 
 func (h *UpdateHandler) Handle(update tgbotapi.Update) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("recovered panic: ", r)
 
+			stack := debug.Stack()
+
+			lines := strings.Split(string(stack), "\n")
+			for i, line := range lines {
+				log.Printf("[%d] %s", i, line)
+			}
+
+			h.sendErrorMessage(update.FromChat().ID)
+		}
+	}()
+
+	if update.FromChat() == nil {
+		log.Println("update chat is nil")
+		return
+	}
 	h.logUpdate(update)
+
 	msges, err := h.processor.Handle(update)
 	if err != nil {
 		log.Printf("error processing update: %v\n", err)
+		h.sendErrorMessage(update.FromChat().ID)
 
-		h.resp.Send(tgbotapi.NewMessage(update.FromChat().ID, "Что-то пошло не так. Попробуй ещё раз :)"))
 		return
 	}
 
@@ -35,19 +56,16 @@ func (h *UpdateHandler) Handle(update tgbotapi.Update) {
 		if err != nil {
 			log.Printf("bot send error. chat: %v, err: %v\n", m.ChatID, err)
 		}
+
+		log.Printf("message sended in chat: %v\n", m.ChatID)
 	}
+}
+
+func (h *UpdateHandler) sendErrorMessage(chatId int64) {
+	h.resp.Send(tgbotapi.NewMessage(chatId, "Что-то пошло не так. Попробуй ещё раз :)"))
 }
 
 func (h *UpdateHandler) logUpdate(update tgbotapi.Update) {
 	chatId := update.FromChat().ID
-
-	// var data string
-	// if update.Message != nil {
-	// 	data = update.Message.Text
-	// } else if update.CallbackQuery != nil {
-	// 	data = update.CallbackData()
-	// }
-	// log.Printf("got update. chat: %v. data: %v", chatId, data)
-
-	log.Printf("got update. chat: %v. update: %v", chatId, update)
+	log.Printf("got update. chat: %v. user: %v", chatId, update.FromChat().UserName)
 }

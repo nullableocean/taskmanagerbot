@@ -2,6 +2,7 @@ package processor
 
 import (
 	"errors"
+	"log"
 	"taskbot/domain"
 	"taskbot/repository"
 	"taskbot/service/task"
@@ -56,7 +57,7 @@ func (p *UpdateProcessor) Handle(update tgbotapi.Update) ([]tgbotapi.MessageConf
 }
 
 func (p *UpdateProcessor) process(user domain.User, state telegram.ChatState, event telegram.Event) ([]tgbotapi.MessageConfig, error) {
-	eventData := event.GetData()
+	eventData := event.Data
 	if event.IsCommand() {
 		return p.handleCommand(user, state, eventData)
 	}
@@ -70,7 +71,7 @@ func (p *UpdateProcessor) process(user domain.User, state telegram.ChatState, ev
 
 func (p *UpdateProcessor) getChatState(user domain.User) (telegram.ChatState, error) {
 	state, err := p.stateStore.Get(user.TelegramId)
-	if errors.As(err, repository.ErrNotFound) {
+	if errors.Is(err, repository.ErrNotFound) {
 		state = telegram.ChatState{
 			Id:       user.TelegramId,
 			Status:   telegram.IDLE,
@@ -79,6 +80,8 @@ func (p *UpdateProcessor) getChatState(user domain.User) (telegram.ChatState, er
 		}
 		err = p.saveChatState(state)
 	}
+
+	log.Println("state getted", state.Status, state.Id, state.Data)
 
 	return state, err
 }

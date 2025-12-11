@@ -16,41 +16,42 @@ func (p *UpdateProcessor) handleTextMessage(user domain.User, state telegram.Cha
 
 	switch state.Status {
 	case telegram.WAIT_TASK_TITLE:
-		t, ok := state.Data.(domain.Task)
-		if !ok {
-			return nil, errors.New("invalid data in state")
+		t, err := state.GetTask()
+		if err != nil {
+			return nil, errors.New("invalid data in state, cannot get task")
 		}
 
 		t.Title = text
-		state.Data = t
+		state.SetTask(*t)
 		state.Status = telegram.WAIT_TASK_BODY
 
-		err := p.stateStore.Save(state)
+		err = p.stateStore.Save(state)
 		if err != nil {
 			return nil, err
 		}
 
 		msges = append(msges, messages.WaitTaskBody(user))
 	case telegram.WAIT_TASK_BODY:
-		t, ok := state.Data.(domain.Task)
-		if !ok {
-			return nil, errors.New("invalid data in state")
+		t, err := state.GetTask()
+		if err != nil {
+			return nil, errors.New("invalid data in state, cannot get task")
 		}
 
 		t.Body = text
 
-		t, err := p.taskService.Create(user, t)
+		savedTask, err := p.taskService.Create(user, *t)
 		if err != nil {
 			return nil, err
 		}
 
 		state.Status = telegram.IDLE
+		state.ClearData()
 		err = p.stateStore.Save(state)
 		if err != nil {
 			return nil, err
 		}
 
-		msges = append(msges, messages.TaskCreated(user), messages.TaskContent(user, t))
+		msges = append(msges, messages.TaskCreated(user), messages.TaskContent(user, savedTask))
 	default:
 		msges = append(msges, messages.HelloMessage(user))
 	}
@@ -135,14 +136,14 @@ func (p *UpdateProcessor) handleCommand(user domain.User, state telegram.ChatSta
 			Status: domain.WAITING,
 		}
 
-		state.Data = task
+		state.SetTask(task)
 		state.Status = telegram.WAIT_TASK_TITLE
 		err := p.saveChatState(state)
 		if err != nil {
 			return nil, err
 		}
 
-		msges = append(msges, messages.WaitTaskBody(user))
+		msges = append(msges, messages.WaitTaskTitle(user))
 	case "list", "/list":
 		var err error
 

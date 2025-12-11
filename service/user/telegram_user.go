@@ -30,17 +30,21 @@ func NewTelegramUserService(us *UserService, repo repository.TelegramUserReposit
 
 func (s *TelegramUserService) CreateFromUpdate(update tgbotapi.Update) (domain.User, error) {
 	if update.Message == nil {
-		return domain.User{}, errors.New("message empty")
+		return domain.User{}, errors.New("message is nil")
+	}
+
+	if update.Message.From == nil {
+		return domain.User{}, errors.New("message.From is nil")
 	}
 
 	chat := update.Message.Chat
 	tid := chat.ID
-	username := update.ChatMember.From.UserName
+	username := update.Message.From.UserName
 
 	log.Printf("new user. chat_id: %d, uid: %d, username: %s",
 		tid,
-		update.ChatMember.From.ID,
-		update.ChatMember.From.UserName,
+		update.Message.From.ID,
+		update.Message.From.UserName,
 	)
 
 	if username == "" {
@@ -49,14 +53,14 @@ func (s *TelegramUserService) CreateFromUpdate(update tgbotapi.Update) (domain.U
 
 	newUser := domain.User{
 		Username:   username,
-		Name:       update.ChatMember.From.FirstName,
+		Name:       update.Message.From.FirstName,
 		Password:   s.getPass(),
 		TelegramId: tid,
 	}
 
 	u, err := s.us.Save(newUser)
 
-	if err != nil && errors.As(err, repository.ErrUsernameTaken) {
+	if err != nil && errors.Is(err, repository.ErrUsernameTaken) {
 		newUser.Username = s.getLabelUsername(tid)
 		return s.us.Save(newUser)
 	}
@@ -65,8 +69,12 @@ func (s *TelegramUserService) CreateFromUpdate(update tgbotapi.Update) (domain.U
 }
 
 func (s *TelegramUserService) FindByTelegramId(tid int64) (domain.User, error) {
+	log.Printf("find user: %v\n", tid)
+
 	u, err := s.urepo.GetByTelegramId(tid)
-	if err != nil && errors.As(err, repository.ErrNotFound) {
+	if err != nil && errors.Is(err, repository.ErrNotFound) {
+		log.Printf("not found user: %v\n", tid)
+
 		return u, service.ErrNotFound
 	}
 

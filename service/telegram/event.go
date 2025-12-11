@@ -1,57 +1,68 @@
 package telegram
 
+import "fmt"
+
 type Event struct {
-	chatId int64
-	data   string
-
-	isCommand, isCallback, isText bool
+	ChatID int64
+	Data   string
+	Type   EventType
 }
 
-func (u Event) GetChatId() int64 {
-	return u.chatId
-}
+type EventType int
 
-func (u Event) GetData() string {
-	return u.data
-}
+const (
+	EventTypeUnknown EventType = iota
+	EventTypeCommand
+	EventTypeCallback
+	EventTypeText
+)
 
-func (u Event) IsText() bool {
-	return u.isText
-}
-
-func (u Event) IsCommand() bool {
-	return u.isCommand
-}
-
-func (u Event) IsCallback() bool {
-	return u.isCallback
-}
-
-func NewCallbackEvent(chatId int64, callback string) Event {
+func NewCommandEvent(chatID int64, command string) Event {
 	return Event{
-		chatId:     chatId,
-		data:       callback,
-		isCommand:  false,
-		isCallback: true,
-		isText:     false,
+		ChatID: chatID,
+		Data:   command,
+		Type:   EventTypeCommand,
 	}
 }
 
-func NewCommandEvent(chatId int64, command string) Event {
+func NewCallbackEvent(chatID int64, callbackData string) Event {
 	return Event{
-		chatId:     chatId,
-		data:       command,
-		isCommand:  false,
-		isCallback: true,
-		isText:     false,
+		ChatID: chatID,
+		Data:   callbackData,
+		Type:   EventTypeCallback,
 	}
 }
-func NewTextEvent(chatId int64, text string) Event {
+
+func NewTextEvent(chatID int64, text string) Event {
 	return Event{
-		chatId:     chatId,
-		data:       text,
-		isCommand:  false,
-		isCallback: true,
-		isText:     false,
+		ChatID: chatID,
+		Data:   text,
+		Type:   EventTypeText,
 	}
+}
+
+func (e Event) IsCommand() bool {
+	return e.Type == EventTypeCommand
+}
+
+func (e Event) IsCallback() bool {
+	return e.Type == EventTypeCallback
+}
+
+func (e Event) IsText() bool {
+	return e.Type == EventTypeText
+}
+
+func (e Event) IsValid() bool {
+	return e.ChatID != 0 && e.Data != "" && e.Type != EventTypeUnknown
+}
+
+func (e Event) String() string {
+	typeNames := map[EventType]string{
+		EventTypeCommand:  "Command",
+		EventTypeCallback: "Callback",
+		EventTypeText:     "Text",
+		EventTypeUnknown:  "Unknown",
+	}
+	return fmt.Sprintf("%s{chat:%d, data:%q}", typeNames[e.Type], e.ChatID, e.Data)
 }
