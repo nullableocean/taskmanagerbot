@@ -1,2 +1,4 @@
 2025/10/18 14:04:53 main.go:83: create bot error: Not Found
 2025/10/18 14:10:53 main.go:85: create bot error: Not Found
+2025/12/11 11:37:43 main.go:53: db ping error: dial tcp 172.22.0.2:5436: connect: connection refused
+2025/12/11 11:39:17 main.go:53: db ping error: dial tcp 172.22.0.2:5436: connect: connection refused

@@ -1,3 +1,2 @@
 ./docker/pgdata
 .env
-migrate.sh
