@@ -30,6 +30,10 @@ func (s *TaskService) Create(user domain.User, task domain.Task) (domain.Task, e
 	return s.repo.Create(task)
 }
 
+func (s *TaskService) Delete(task domain.Task) error {
+	return s.repo.Delete(task)
+}
+
 func (s *TaskService) Update(task domain.Task) (domain.Task, error) {
 	err := s.validateTask(task)
 	if err != nil {

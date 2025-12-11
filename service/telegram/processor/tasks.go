@@ -48,3 +48,19 @@ func (p *UpdateProcessor) getTasksMessages(user domain.User, tasks []domain.Task
 
 	return msges
 }
+
+func (p *UpdateProcessor) getTasksListMessages(user domain.User, page int) ([]tgbotapi.MessageConfig, error) {
+	tasks, err := p.getTasksPerPage(user, page)
+	if err != nil {
+		return nil, err
+	}
+
+	msges := p.getTasksMessages(user, tasks)
+
+	nextPageMsg := tgbotapi.NewMessage(user.TelegramId, "")
+	nextPageMsg.ReplyMarkup = keyboard.NextPageInlineKeyboard(page + 1)
+
+	msges = append(msges, nextPageMsg)
+
+	return msges, nil
+}

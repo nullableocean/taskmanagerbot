@@ -68,3 +68,11 @@ func TaskAlreadyReady(user domain.User) tgbotapi.MessageConfig {
 
 	return tgbotapi.NewMessage(user.TelegramId, text)
 }
+
+func TaskDeleted(user domain.User) tgbotapi.MessageConfig {
+	text := `
+<b>Задача удалена.</b>	
+`
+
+	return tgbotapi.NewMessage(user.TelegramId, text)
+}

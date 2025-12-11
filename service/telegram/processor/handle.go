@@ -90,8 +90,34 @@ func (p *UpdateProcessor) handleCallback(user domain.User, state telegram.ChatSt
 
 		msges = append(msges, msg)
 
-		// TODO NEXT PAGE CALLBACK
-		// DELETE TASK CALLBACK
+	case callback.TaskDelete:
+		taskId, err := strconv.ParseInt(data, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		t, err := p.taskService.GetById(taskId)
+		if err != nil {
+			return nil, err
+		}
+
+		err = p.taskService.Delete(t)
+		if err != nil {
+			return nil, err
+		}
+
+		msges = append(msges, messages.TaskDeleted(user))
+
+	case callback.NextTasksPage:
+		nextPage, err := strconv.Atoi(data)
+		if err != nil {
+			return nil, err
+		}
+
+		msges, err = p.getTasksListMessages(user, nextPage)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return msges, nil
@@ -118,12 +144,12 @@ func (p *UpdateProcessor) handleCommand(user domain.User, state telegram.ChatSta
 
 		msges = append(msges, messages.WaitTaskBody(user))
 	case "list", "/list":
-		tasks, err := p.getTasksPerPage(user, 1)
+		var err error
+
+		msges, err = p.getTasksListMessages(user, 1)
 		if err != nil {
 			return nil, err
 		}
-
-		msges = p.getTasksMessages(user, tasks)
 	}
 
 	return msges, nil

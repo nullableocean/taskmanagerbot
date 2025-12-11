@@ -8,8 +8,9 @@ import (
 type Operation string
 
 const (
-	TaskDone   Operation = "tdone"
-	TaskDelete Operation = "tdelete"
+	TaskDone      Operation = "tdone"
+	TaskDelete    Operation = "tdelete"
+	NextTasksPage Operation = "tnextpage"
 )
 
 const (
