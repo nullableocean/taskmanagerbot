@@ -6,6 +6,7 @@ import (
 	"taskbot/domain"
 	"taskbot/service/telegram"
 	"taskbot/service/telegram/callback"
+	"taskbot/service/telegram/keyboard"
 	"taskbot/service/telegram/messages"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -89,6 +90,7 @@ func (p *UpdateProcessor) handleCallback(user domain.User, state telegram.ChatSt
 			msg = messages.TaskAlreadyReady(user)
 		}
 
+		msg.ReplyMarkup = keyboard.NextPageInlineKeyboard(messages.ListMessage, 1)
 		msges = append(msges, msg)
 
 	case callback.TaskDelete:
@@ -107,7 +109,9 @@ func (p *UpdateProcessor) handleCallback(user domain.User, state telegram.ChatSt
 			return nil, err
 		}
 
-		msges = append(msges, messages.TaskDeleted(user))
+		msg := messages.TaskDeleted(user)
+		msg.ReplyMarkup = keyboard.NextPageInlineKeyboard(messages.ListMessage, 1)
+		msges = append(msges, msg)
 
 	case callback.NextTasksPage:
 		nextPage, err := strconv.Atoi(data)

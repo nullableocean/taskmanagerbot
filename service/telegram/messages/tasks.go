@@ -8,6 +8,7 @@ import (
 )
 
 const (
+	ListMessage          = "Список"
 	NextPageMessage      = "Что там дальше?"
 	NextPageEmptyMessage = "Больше ничего нет"
 	NextBtnMessage       = "⏩"
