@@ -134,6 +134,7 @@ func setupBotWithWebhook(conf Config) *tgbotapi.BotAPI {
 	}
 
 	wh, _ := tgbotapi.NewWebhook(conf.BOT.WebhookUrl)
+
 	_, err = bot.Request(wh)
 	if err != nil {
 		log.Fatalf("request webhook error: %v", err)

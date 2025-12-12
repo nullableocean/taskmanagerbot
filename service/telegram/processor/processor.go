@@ -2,7 +2,6 @@ package processor
 
 import (
 	"errors"
-	"log"
 	"taskbot/domain"
 	"taskbot/repository"
 	"taskbot/service/task"
@@ -80,8 +79,6 @@ func (p *UpdateProcessor) getChatState(user domain.User) (telegram.ChatState, er
 		}
 		err = p.saveChatState(state)
 	}
-
-	log.Println("state getted", state.Status, state.Id, state.Data)
 
 	return state, err
 }

@@ -2,6 +2,7 @@ package pg
 
 import (
 	"database/sql"
+	"fmt"
 	"taskbot/domain"
 	"taskbot/repository"
 	"time"
@@ -99,36 +100,31 @@ func (r *TaskRepository) Update(task domain.Task) (domain.Task, error) {
 }
 
 func (r *TaskRepository) GetAll(userId int64) ([]domain.Task, error) {
-	var count int
-	err := r.db.QueryRow("SELECT COUNT(*) FROM tasks WHERE user_id = $1", userId).Scan(&count)
-	if err != nil {
-		return []domain.Task{}, err
-	}
-
 	query := `
-		SELECT id, user_id, title, body, status, created_at, updated_at
-		FROM tasks
-		WHERE user_id = $1
-	`
+        SELECT id, user_id, title, body, status, created_at, updated_at
+        FROM tasks
+        WHERE user_id = $1
+        ORDER BY created_at DESC
+    `
+
 	rows, err := r.db.Query(query, userId)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return []domain.Task{}, repository.ErrNotFound
-		}
-
-		return []domain.Task{}, err
+		return nil, err
 	}
-
-	tasks := make([]domain.Task, 0, count)
-
 	defer rows.Close()
+
+	var tasks []domain.Task
+
 	for rows.Next() {
-		t, err := r.scanRowsToTask(rows)
+		task, err := r.scanRowsToTask(rows)
 		if err != nil {
 			return tasks, err
 		}
+		tasks = append(tasks, task)
+	}
 
-		tasks = append(tasks, t)
+	if err := rows.Err(); err != nil {
+		return tasks, err
 	}
 
 	return tasks, nil
@@ -136,42 +132,49 @@ func (r *TaskRepository) GetAll(userId int64) ([]domain.Task, error) {
 
 func (r *TaskRepository) Get(id int64) (domain.Task, error) {
 	query := `
-		SELECT id, user_id, title, body, status, created_at, updated_at
-		FROM tasks
-		WHERE id = $1
-	`
-	rows, err := r.db.Query(query, id)
+        SELECT id, user_id, title, body, status, created_at, updated_at
+        FROM tasks
+        WHERE id = $1
+    `
+
+	var task domain.Task
+	err := r.db.QueryRow(query, id).Scan(
+		&task.Id,
+		&task.UserId,
+		&task.Title,
+		&task.Body,
+		&task.Status,
+		&task.CreatedAt,
+		&task.UpdatedAt,
+	)
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return domain.Task{}, repository.ErrNotFound
 		}
-
 		return domain.Task{}, err
 	}
 
-	defer rows.Close()
-	rows.Next()
-
-	return r.scanRowsToTask(rows)
+	return task, nil
 }
 
 func (r *TaskRepository) Delete(task domain.Task) error {
 	query := `
-		DELETE
-		FROM tasks
-		WHERE id = $1
-	`
+        DELETE FROM tasks
+        WHERE id = $1
+    `
+
 	res, err := r.db.Exec(query, task.Id)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return repository.ErrNotFound
-		}
-
-		return err
+		return fmt.Errorf("delete task: %w", err)
 	}
 
-	rowAffected, err := res.RowsAffected()
-	if rowAffected == 0 || err != nil {
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("get rows affected: %w", err)
+	}
+
+	if rowsAffected == 0 {
 		return repository.ErrNotFound
 	}
 

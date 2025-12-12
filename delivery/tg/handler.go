@@ -56,8 +56,6 @@ func (h *UpdateHandler) Handle(update tgbotapi.Update) {
 		if err != nil {
 			log.Printf("bot send error. chat: %v, err: %v\n", m.ChatID, err)
 		}
-
-		log.Printf("message sended in chat: %v\n", m.ChatID)
 	}
 }
 
@@ -66,6 +64,5 @@ func (h *UpdateHandler) sendErrorMessage(chatId int64) {
 }
 
 func (h *UpdateHandler) logUpdate(update tgbotapi.Update) {
-	chatId := update.FromChat().ID
-	log.Printf("got update. chat: %v. user: %v", chatId, update.FromChat().UserName)
+	log.Printf("got update. user: %v", update.FromChat().UserName)
 }

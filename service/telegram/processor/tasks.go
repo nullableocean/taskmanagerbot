@@ -13,14 +13,10 @@ func (p *UpdateProcessor) getTasksPerPage(user domain.User, page int) ([]domain.
 		page = 1
 	}
 
-	var pagedTasks []domain.Task
-
 	tasks, err := p.taskService.GetAll(user)
 	if err != nil {
-		return pagedTasks, err
+		return nil, err
 	}
-
-	pagedTasks = make([]domain.Task, 0, 10)
 
 	start := (page - 1) * tasksInPage
 	end := page * tasksInPage
@@ -33,7 +29,7 @@ func (p *UpdateProcessor) getTasksPerPage(user domain.User, page int) ([]domain.
 		end = len(tasks)
 	}
 
-	return pagedTasks[start:end], nil
+	return tasks[start:end], nil
 }
 
 func (p *UpdateProcessor) getTasksMessages(user domain.User, tasks []domain.Task) []tgbotapi.MessageConfig {
@@ -58,7 +54,18 @@ func (p *UpdateProcessor) getTasksListMessages(user domain.User, page int) ([]tg
 	msges := p.getTasksMessages(user, tasks)
 
 	nextPageMsg := tgbotapi.NewMessage(user.TelegramId, "")
-	nextPageMsg.ReplyMarkup = keyboard.NextPageInlineKeyboard(page + 1)
+	if len(tasks) != 0 {
+		nextPageMsg.Text = messages.NextPageMessage
+		nextPageMsg.ReplyMarkup = keyboard.NextPageInlineKeyboard(messages.NextBtnMessage, page+1)
+	} else {
+		backPage := page - 1
+		if backPage < 1 {
+			backPage = 1
+		}
+
+		nextPageMsg.Text = messages.NextPageEmptyMessage
+		nextPageMsg.ReplyMarkup = keyboard.NextPageInlineKeyboard(messages.BackBtnMessage, backPage)
+	}
 
 	msges = append(msges, nextPageMsg)
 

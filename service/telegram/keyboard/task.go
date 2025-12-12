@@ -22,11 +22,11 @@ func TaskInlineKeyboard(task domain.Task) tgbotapi.InlineKeyboardMarkup {
 	return keyboard
 }
 
-func NextPageInlineKeyboard(page int) tgbotapi.InlineKeyboardMarkup {
+func NextPageInlineKeyboard(text string, page int) tgbotapi.InlineKeyboardMarkup {
 	keyboard := tgbotapi.InlineKeyboardMarkup{}
 	strPage := strconv.Itoa(page)
 	rowBtns := []tgbotapi.InlineKeyboardButton{
-		tgbotapi.NewInlineKeyboardButtonData("Дальше", callback.CreateCallbackData(callback.NextTasksPage, strPage)),
+		tgbotapi.NewInlineKeyboardButtonData(text, callback.CreateCallbackData(callback.NextTasksPage, strPage)),
 	}
 
 	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, rowBtns)

@@ -7,6 +7,13 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+const (
+	NextPageMessage      = "Что там дальше?"
+	NextPageEmptyMessage = "Больше ничего нет"
+	NextBtnMessage       = "⏩"
+	BackBtnMessage       = "⏪"
+)
+
 func TaskContent(user domain.User, task domain.Task) tgbotapi.MessageConfig {
 	format := `
 <b>%s</b>
